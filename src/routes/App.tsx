@@ -24,9 +24,10 @@ function WebcamCanvas() {
     height: 0,
   });
   const [cameraSettings, setCameraSettings] = useAtom(cameraSettingsAtom);
-  const { flipHorizontal, flipVertical } = selectedDeviceId
-    ? cameraSettings[selectedDeviceId]
+  const currentSettings = selectedDeviceId
+    ? (cameraSettings[selectedDeviceId] || defaultCameraSettings)
     : defaultCameraSettings;
+  const { flipHorizontal, flipVertical } = currentSettings;
   const [videoSize, setVideoSize] = useState<{
     width: number;
     height: number;
