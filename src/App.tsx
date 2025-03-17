@@ -142,7 +142,10 @@ function App() {
           {cropBox ? (
             <button
               className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700"
-              onClick={() => setCropBox(null)}
+              onClick={() => {
+                setCropBox(null);
+                setShowCrop(false);
+              }}
             >
               &times;
             </button>
