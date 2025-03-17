@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { FlipHorizontal2, FlipVertical2 } from "lucide-react";
 import { useAtom } from "jotai";
-import { cameraSettingsAtom } from "../atoms";
-import { defaultCameraSettings } from "../consts";
+import { cameraSettingsAtom } from "./atoms";
+import { defaultCameraSettings } from "./consts";
 
 function Index() {
   return <WebcamCanvas />;

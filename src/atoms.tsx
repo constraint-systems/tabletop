@@ -1,6 +1,6 @@
-import { cameraSettingsType } from "./types";
+import { CameraSettingsType } from "./types";
 import { atomWithStorage } from "jotai/utils";
 
 export const cameraSettingsAtom = atomWithStorage<
-  Record<string, cameraSettingsType>
+  Record<string, CameraSettingsType>
 >("camera-settings", {});
