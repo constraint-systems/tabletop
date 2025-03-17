@@ -43,6 +43,7 @@ function CropOverlay({
       const top = detector.getBoundingClientRect().top;
       const drag = dragRef.current;
       const handlePointerDown = (event: PointerEvent) => {
+        event.preventDefault();
         (event.target as HTMLElement).setPointerCapture(event.pointerId);
         if (event.button !== 0) return;
         drag.isDragging = true;
@@ -111,7 +112,7 @@ function CropOverlay({
     <>
       <div
         ref={detectorRef}
-        className="absolute cursor-crosshair top-0 left-0 w-full h-full"
+        className="absolute touch-none cursor-crosshair top-0 left-0 w-full h-full"
       ></div>
       <div
         className="absolute top-0 pointer-events-none left-0 w-full h-full"
