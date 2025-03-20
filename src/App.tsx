@@ -9,7 +9,7 @@ function App() {
     selectedDeviceIndex,
     setSelectedDeviceIndex,
     stream,
-    selectedDeviceId,
+    selectedDeviceLabel,
     cameraSettings,
     setCameraSettings,
   } = useDevices();
@@ -19,8 +19,8 @@ function App() {
   function setVideoSize({ width, height }: { width: number; height: number }) {
     setCameraSettings((prev) => ({
       ...prev,
-      [selectedDeviceId]: {
-        ...prev[selectedDeviceId],
+      [selectedDeviceLabel]: {
+        ...prev[selectedDeviceLabel],
         videoSize: { width, height },
       },
     }));
@@ -30,8 +30,8 @@ function App() {
   ) {
     setCameraSettings((prev) => ({
       ...prev,
-      [selectedDeviceId]: {
-        ...prev[selectedDeviceId],
+      [selectedDeviceLabel]: {
+        ...prev[selectedDeviceLabel],
         cropBox,
       },
     }));
@@ -39,8 +39,8 @@ function App() {
   function setShowCrop(showCrop: boolean) {
     setCameraSettings((prev) => ({
       ...prev,
-      [selectedDeviceId]: {
-        ...prev[selectedDeviceId],
+      [selectedDeviceLabel]: {
+        ...prev[selectedDeviceLabel],
         showCrop,
       },
     }));
@@ -81,11 +81,11 @@ function App() {
             <button
               className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 flex justify-center items-center"
               onClick={() => {
-                if (selectedDeviceId) {
+                if (selectedDeviceLabel) {
                   setCameraSettings((prev) => ({
                     ...prev,
-                    [selectedDeviceId]: {
-                      ...prev[selectedDeviceId],
+                    [selectedDeviceLabel]: {
+                      ...prev[selectedDeviceLabel],
                       flipHorizontal: !cameraSettings.flipHorizontal,
                     },
                   }));
@@ -97,11 +97,11 @@ function App() {
             <button
               className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 flex justify-center items-center"
               onClick={() => {
-                if (selectedDeviceId) {
+                if (selectedDeviceLabel) {
                   setCameraSettings((prev) => ({
                     ...prev,
-                    [selectedDeviceId]: {
-                      ...prev[selectedDeviceId],
+                    [selectedDeviceLabel]: {
+                      ...prev[selectedDeviceLabel],
                       flipVertical: !cameraSettings.flipVertical,
                     },
                   }));

@@ -6,3 +6,8 @@ export const defaultCameraSettings = {
   cropBox: null,
   showCrop: false
 };
+
+export const idealResolution = {
+  width: 3840,
+  height: 2160
+}

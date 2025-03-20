@@ -15,10 +15,6 @@
   font-style: normal;
 }
 
-body {
-  font-family: sans-serif;
-}
-
 html,
 body {
   background: theme("colors.black");

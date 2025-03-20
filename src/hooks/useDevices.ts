@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useAtom } from "jotai";
 import { cameraSettingsAtom } from "../atoms";
-import { defaultCameraSettings } from "../consts";
+import { defaultCameraSettings, idealResolution } from "../consts";
 
-const preferredDeviceStorageName = "preferredDevice";
+const preferredDeviceStorageName = "preferredDeviceLabel";
 
 export function useDevices() {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -11,11 +11,12 @@ export function useDevices() {
   const [cameraSettings, setCameraSettings] = useAtom(cameraSettingsAtom);
   const currentSettings = {
     ...defaultCameraSettings,
-    ...cameraSettings[devices[selectedDeviceIndex]?.deviceId],
+    ...cameraSettings[devices[selectedDeviceIndex]?.label],
   };
   const [stream, setStream] = useState<MediaStream | null>(null);
 
-  const selectedDeviceId = devices[selectedDeviceIndex]?.deviceId;
+  const selectedDeviceId = devices[selectedDeviceIndex]?.deviceId
+  const selectedDeviceLabel = devices[selectedDeviceIndex]?.label;
 
   const streamRef = useRef<MediaStream | null>(null);
   streamRef.current = stream;
@@ -33,8 +34,8 @@ export function useDevices() {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             deviceId: { exact: deviceId },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { ideal: idealResolution.width },
+            height: { ideal: idealResolution.height },
           },
         });
         streamRef.current = stream;
@@ -61,8 +62,8 @@ export function useDevices() {
         // Trigger the browser to ask for permission to use the camera
         await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { ideal: idealResolution.width },
+            height: { ideal: idealResolution.height },
           },
         });
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -72,13 +73,13 @@ export function useDevices() {
 
         // use preferred device if it exists
         // can't count on device id or order being consistent
-        const preferredDeviceId = localStorage.getItem(
+        const preferredDeviceLabel = localStorage.getItem(
           preferredDeviceStorageName,
         );
         setDevices(videoDevices);
-        if (preferredDeviceId) {
+        if (preferredDeviceLabel) {
           const preferredDeviceIndex = videoDevices.findIndex(
-            (device) => device.deviceId === preferredDeviceId,
+            (device) => device.label === preferredDeviceLabel,
           );
           if (preferredDeviceIndex !== -1) {
             setSelectedDeviceIndex(preferredDeviceIndex);
@@ -96,6 +97,7 @@ export function useDevices() {
     selectedDeviceIndex,
     setSelectedDeviceIndex,
     selectedDeviceId,
+    selectedDeviceLabel,
     stream,
     cameraSettings: currentSettings,
     setCameraSettings,
