@@ -15,7 +15,7 @@ export function useDevices() {
   };
   const [stream, setStream] = useState<MediaStream | null>(null);
 
-  const selectedDeviceId = devices[selectedDeviceIndex]?.deviceId
+  const selectedDeviceId = devices[selectedDeviceIndex]?.deviceId;
   const selectedDeviceLabel = devices[selectedDeviceIndex]?.label;
 
   const streamRef = useRef<MediaStream | null>(null);
@@ -35,7 +35,6 @@ export function useDevices() {
           video: {
             deviceId: { exact: deviceId },
             width: { ideal: idealResolution.width },
-            height: { ideal: idealResolution.height },
           },
         });
         streamRef.current = stream;
@@ -59,11 +58,10 @@ export function useDevices() {
   useEffect(() => {
     const getCameras = async () => {
       try {
-        // Trigger the browser to ask for permission to use the camera
+       // Trigger the browser to ask for permission to use the camera
         await navigator.mediaDevices.getUserMedia({
           video: {
             width: { ideal: idealResolution.width },
-            height: { ideal: idealResolution.height },
           },
         });
         const devices = await navigator.mediaDevices.enumerateDevices();
