@@ -30,6 +30,15 @@ function CropOverlay({
     min: { x: 0, y: 0 },
     max: { x: 0, y: 0 },
   });
+  const movingRef = useRef<{
+    isMoving: boolean;
+    start: { x: number; y: number };
+    startingCropBox: CropBoxType;
+  }>({
+    isMoving: false,
+    start: { x: 0, y: 0 },
+    startingCropBox: { minX: 0, minY: 0, maxX: 0, maxY: 0 },
+  });
 
   useEffect(() => {
     function constrainX(x: number) {
@@ -46,16 +55,18 @@ function CropOverlay({
         event.preventDefault();
         (event.target as HTMLElement).setPointerCapture(event.pointerId);
         if (event.button !== 0) return;
-        drag.isDragging = true;
+
         const x = event.clientX;
         const y = event.clientY - top;
         drag.start = { x, y };
         drag.current = { x, y };
+        drag.isDragging = true;
         drag.min = { x, y };
         drag.max = { x, y };
       };
       const handlePointerMove = (event: PointerEvent) => {
         if (drag.isDragging) {
+          // Creating/resizing crop box logic
           const x = event.clientX;
           const y = event.clientY - top;
           drag.current = { x, y };
@@ -126,7 +137,77 @@ function CropOverlay({
       >
         {cropBox ? (
           <div
-            className="absolute border-[2px] border-blue-500 top-0 pointer-events-none left-0 w-full h-full"
+            className="absolute pointer-events-auto border-[2px] border-blue-500 top-0 left-0 w-full h-full cursor-move"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              (e.target as HTMLElement).setPointerCapture(e.pointerId);
+              if (e.button !== 0) return;
+              movingRef.current.isMoving = true;
+              movingRef.current.start = {
+                x: e.clientX,
+                y: e.clientY,
+              };
+              movingRef.current.startingCropBox = { ...cropBox };
+            }}
+            onPointerMove={(e) => {
+              if (movingRef.current.isMoving) {
+                e.preventDefault();
+                e.stopPropagation();
+                const x = e.clientX;
+                const y = e.clientY;
+                const dx = x - movingRef.current.start.x;
+                const dy = y - movingRef.current.start.y;
+                const scaledDx =
+                  (dx / canvasDisplaySize.width) * videoSize.width;
+                const scaledDy =
+                  (dy / canvasDisplaySize.height) * videoSize.height;
+                let targetMinX =
+                  movingRef.current.startingCropBox!.minX + scaledDx;
+                let targetMinY =
+                  movingRef.current.startingCropBox!.minY + scaledDy;
+                let targetMaxX =
+                  movingRef.current.startingCropBox!.maxX + scaledDx;
+                let targetMaxY =
+                  movingRef.current.startingCropBox!.maxY + scaledDy;
+                const startingWidth =
+                  movingRef.current.startingCropBox!.maxX -
+                  movingRef.current.startingCropBox!.minX;
+                const startingHeight =
+                  movingRef.current.startingCropBox!.maxY -
+                  movingRef.current.startingCropBox!.minY;
+                // Constrain the crop box to the video size
+                if (targetMinX < 0) {
+                  targetMinX = 0;
+                  targetMaxX = startingWidth;
+                }
+                if (targetMinY < 0) {
+                  targetMinY = 0;
+                  targetMaxY = startingHeight;
+                }
+                if (targetMaxX > videoSize.width) {
+                  targetMaxX = videoSize.width;
+                  targetMinX = targetMaxX - startingWidth;
+                }
+                if (targetMaxY > videoSize.height) {
+                  targetMaxY = videoSize.height;
+                  targetMinY = targetMaxY - startingHeight;
+                }
+                const newCropBox: CropBoxType = {
+                  minX: Math.round(targetMinX),
+                  minY: Math.round(targetMinY),
+                  maxX: Math.round(targetMaxX),
+                  maxY: Math.round(targetMaxY),
+                };
+                setCropBox(newCropBox);
+              }
+            }}
+            onPointerUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+              movingRef.current.isMoving = false;
+            }}
             style={{
               left:
                 (cropBox.minX / videoSize.width) * canvasDisplaySize.width -
@@ -142,7 +223,6 @@ function CropOverlay({
                 ((cropBox.maxY - cropBox.minY) / videoSize.height) *
                 canvasDisplaySize.height +
                 borderWidth,
-              pointerEvents: "none",
             }}
           ></div>
         ) : null}

@@ -47,7 +47,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col w-full h-[100dvh] overflow-hidden grow items-center">
+    <div className="flex select-none flex-col w-full h-[100dvh] overflow-hidden grow items-center">
       <div className="w-full">
         <div className="flex">
           <div className="grow">
