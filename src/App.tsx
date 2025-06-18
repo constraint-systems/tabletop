@@ -2,7 +2,7 @@ import { useDevices } from "./hooks/useDevices";
 import VideoRenderer from "./VideoRenderer";
 import { FlipHorizontal2, FlipVertical2 } from "lucide-react";
 import { CropRenderer } from "./CropRenderer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
   const {
@@ -53,6 +53,102 @@ function App() {
       },
     }));
   }
+  
+  // Handle keyboard shortcuts for moving and resizing the crop box
+  useEffect(() => {
+    if (!cropBox) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (showDimensionsModal) return; // Don't handle keyboard shortcuts when modal is open
+      
+      // Determine the pixel change amount (1 or 8 pixels)
+      const pixelChange = e.shiftKey ? 8 : 1;
+      
+      if (e.ctrlKey) {
+        // CTRL + arrows: resize the crop box
+        if (e.key === "ArrowUp") {
+          // Decrease height from bottom
+          const newMaxY = Math.max(cropBox.minY + 16, cropBox.maxY - pixelChange);
+          setCropBox({
+            ...cropBox,
+            maxY: newMaxY
+          });
+          e.preventDefault();
+        } else if (e.key === "ArrowDown") {
+          // Increase height from bottom
+          const newMaxY = Math.min(videoSize.height, cropBox.maxY + pixelChange);
+          setCropBox({
+            ...cropBox,
+            maxY: newMaxY
+          });
+          e.preventDefault();
+        } else if (e.key === "ArrowLeft") {
+          // Decrease width from right
+          const newMaxX = Math.max(cropBox.minX + 16, cropBox.maxX - pixelChange);
+          setCropBox({
+            ...cropBox,
+            maxX: newMaxX
+          });
+          e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+          // Increase width from right
+          const newMaxX = Math.min(videoSize.width, cropBox.maxX + pixelChange);
+          setCropBox({
+            ...cropBox,
+            maxX: newMaxX
+          });
+          e.preventDefault();
+        }
+      } else {
+        // Arrow keys only: move the crop box
+        const width = cropBox.maxX - cropBox.minX;
+        const height = cropBox.maxY - cropBox.minY;
+        
+        if (e.key === "ArrowUp") {
+          // Move up
+          const newMinY = Math.max(0, cropBox.minY - pixelChange);
+          setCropBox({
+            ...cropBox,
+            minY: newMinY,
+            maxY: newMinY + height
+          });
+          e.preventDefault();
+        } else if (e.key === "ArrowDown") {
+          // Move down
+          const newMinY = Math.min(videoSize.height - height, cropBox.minY + pixelChange);
+          setCropBox({
+            ...cropBox,
+            minY: newMinY,
+            maxY: newMinY + height
+          });
+          e.preventDefault();
+        } else if (e.key === "ArrowLeft") {
+          // Move left
+          const newMinX = Math.max(0, cropBox.minX - pixelChange);
+          setCropBox({
+            ...cropBox,
+            minX: newMinX,
+            maxX: newMinX + width
+          });
+          e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+          // Move right
+          const newMinX = Math.min(videoSize.width - width, cropBox.minX + pixelChange);
+          setCropBox({
+            ...cropBox,
+            minX: newMinX,
+            maxX: newMinX + width
+          });
+          e.preventDefault();
+        }
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [cropBox, videoSize, showDimensionsModal]);
 
   return (
     <div className="flex select-none flex-col w-full h-[100dvh] overflow-hidden grow items-center">
@@ -206,13 +302,14 @@ function App() {
         </button>
       </div>
 
-      {/* Dimensions Modal */}
       {showDimensionsModal && cropBox && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           onClick={() => setShowDimensionsModal(false)}
         >
-          <div className="bg-neutral-900 p-4 w-80">
+          <div className="bg-neutral-900 p-4 w-80"
+            onClick={(e) => e.stopPropagation()}
+          >
             <form
               onSubmit={(e) => {
                 e.preventDefault();
